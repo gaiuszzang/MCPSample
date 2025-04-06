@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    id("org.jetbrains.kotlinx.atomicfu") version "0.27.0"
 }
 
 android {
@@ -53,6 +55,17 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.serialization)
+
+    implementation("org.jetbrains.kotlinx:atomicfu:0.27.0")
+
     implementation("io.modelcontextprotocol:kotlin-sdk:0.3.0")
     implementation("com.anthropic:anthropic-java:0.8.0")
 
