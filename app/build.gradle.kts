@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    id("org.jetbrains.kotlinx.atomicfu") version "0.27.0"
 }
 
 android {
@@ -44,6 +46,7 @@ android {
 
 dependencies {
 
+    //androidx
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,9 +55,33 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    //kotlinx
     implementation(libs.kotlinx.collections.immutable)
-    implementation("io.modelcontextprotocol:kotlin-sdk:0.3.0")
-    implementation("com.anthropic:anthropic-java:0.8.0")
+
+    //koin
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    //ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.serialization)
+
+    // mcp
+    implementation(libs.mcp.sdk)
+    implementation(libs.atomicfu)
+
+    // anthropic claude
+    implementation(libs.anthropic.java)
+
+    // open ai
+    implementation(libs.openai.java)
+
+    // gemini (deprecated version)
+    implementation("dev.shreyaspatil.generativeai:generativeai-google:0.9.0-1.1.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
