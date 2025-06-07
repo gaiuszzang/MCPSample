@@ -33,7 +33,7 @@ class GetAllMemoryTool(
         val memoryList = dbDao.getAllMemory()
 
         return if (memoryList.isNotEmpty()) {
-            val result = MemoryResult(notificationList = memoryList)
+            val result = MemoryResult(memoryList = memoryList)
             CallToolResult(
                 content = listOf(TextContent(Json.encodeToString(result)))
             )
@@ -48,7 +48,7 @@ class GetAllMemoryTool(
 
     @Serializable
     data class MemoryResult(
-        val notificationList: List<UserMemory>
+        val memoryList: List<UserMemory>
     )
 }
 
