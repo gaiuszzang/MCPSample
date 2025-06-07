@@ -54,6 +54,7 @@ class MainRepository(
         private const val ASR_AUTO_RESULT_MODE_PREF_KEY = "ASR_AUTO_RESULT_MODE"
         private const val AUTO_ENABLE_MCP_CONNECTION = "AUTO_ENABLE_MCP_CONNECTION"
         private const val MCP_REMOTE_SERVER_LIST = "MCP_REMOTE_SERVER_LIST"
+        private const val USER_MEMORY_PREF_KEY = "USER_MEMORY"
     }
     private val coroutineScope = CoroutineScope(SupervisorJob())
     private val encryptHelper = EncryptHelper(
@@ -117,6 +118,17 @@ class MainRepository(
 
     fun getAutoEnableMcpConnection(): Boolean {
         return sharedPreferences.getBoolean(AUTO_ENABLE_MCP_CONNECTION, false)
+    }
+
+    fun getUserMemory(): String {
+        return sharedPreferences.getString(USER_MEMORY_PREF_KEY, "") ?: ""
+    }
+
+    fun setUserMemory(memory: String) {
+        sharedPreferences.edit {
+            putString(USER_MEMORY_PREF_KEY, memory)
+            commit()
+        }
     }
 
     fun setClaudeApiKey(apiKey: String) {
