@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.qualifier._q
 import java.util.UUID
+import java.lang.StringBuilder
 
 class MainViewModel(
     private val mainRepository: MainRepository,
@@ -173,7 +174,37 @@ class MainViewModel(
     }
 
     private suspend fun handleMessage(messages: List<LLMManager.MessageItem>) {
-        val systemPrompt = settingUiState.value.systemPrompt.trim()
+        val userPrompt = messages.lastOrNull { it.type == LLMManager.MessageItem.Type.User }?.message ?: ""
+        var userMemory = mainRepository.getUserMemory()
+
+        if (userPrompt.isNotBlank()) {
+            val updatedMemory = runMemoryTask(
+                systemPrompt = "You update long term memory. Respond only with the updated memory.",
+                userPrompt = userPrompt,
+                memory = userMemory
+            ).trim()
+            if (updatedMemory.isNotEmpty()) {
+                userMemory = updatedMemory
+                mainRepository.setUserMemory(userMemory)
+            }
+        }
+
+        val relatedMemory = if (userPrompt.isNotBlank()) {
+            runMemoryTask(
+                systemPrompt = "Extract relevant part from memory for given prompt. Return empty string if none.",
+                userPrompt = userPrompt,
+                memory = userMemory
+            ).trim()
+        } else ""
+
+        val basePrompt = settingUiState.value.systemPrompt.trim()
+        val systemPrompt = buildString {
+            append(basePrompt)
+            if (relatedMemory.isNotBlank()) {
+                append("\n")
+                append(relatedMemory)
+            }
+        }
         try {
             llmManager.handleMessage(
                 systemPrompt = systemPrompt,
@@ -265,6 +296,23 @@ class MainViewModel(
                 messageList = newMessageList.toImmutableList()
             )
         }
+    }
+
+    private suspend fun runMemoryTask(systemPrompt: String, userPrompt: String, memory: String): String {
+        val result = StringBuilder()
+        llmManager.handleMessage(
+            systemPrompt = systemPrompt,
+            messages = listOf(
+                LLMManager.MessageItem(
+                    LLMManager.MessageItem.Type.User,
+                    "prompt:\n$userPrompt\nmemory:\n$memory"
+                )
+            ),
+            mcpTools = emptyList(),
+            onResponse = { _, response -> result.append(response) },
+            onToolCall = { _, _ -> null }
+        )
+        return result.toString()
     }
 
     private fun createMessageId(): String {
