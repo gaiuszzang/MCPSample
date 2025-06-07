@@ -85,17 +85,15 @@ class GetContactDetailTool(
         )
 
         val cursor = resolver.query(phoneUri, projection, null, null, null)
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                val nameIndex = cursor.getColumnIndex(projection[1])
-                val numberIndex = cursor.getColumnIndex(projection[2])
-                val name = cursor.getString(nameIndex)
-                val number = cursor.getString(numberIndex)
+        cursor?.use {
+            while (it.moveToNext()) {
+                val nameIndex = it.getColumnIndex(projection[1])
+                val numberIndex = it.getColumnIndex(projection[2])
+                val name = it.getString(nameIndex)
+                val number = it.getString(numberIndex)
                 result.add(Pair(name, number))
             }
         }
-        // 데이터 계열은 반드시 닫아줘야 한다.
-        cursor!!.close()
         return result
     }
 
