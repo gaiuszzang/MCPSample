@@ -16,13 +16,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withTimeout
 import org.koin.core.qualifier._q
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 class MainViewModel(
     private val mainRepository: MainRepository,
@@ -191,10 +194,18 @@ class MainViewModel(
                     if (mcpClient != null) {
                         val toolMessageId = createMessageId()
                         addMessage(ChatUiState.Message.Type.Tool, "(Call Tool)\ntoolName:$toolName\nargument:$arguments", id = toolMessageId)
-                        val result = mcpClient.callTool(name = toolName, arguments = arguments)
+                        val result = try {
+                            withTimeout(20.seconds) {
+                                mcpClient.callTool(name = toolName, arguments = arguments)
+                            }
+                        } catch(e: TimeoutCancellationException) {
+                            e.printStackTrace()
+                            addMessage(ChatUiState.Message.Type.System, "Error: ${e.message}")
+                            null
+                        }
                         val isError = result?.isError != false
                         val resultMessage = result?.content?.joinToString() ?: "null"
-                        updateMessage(id = toolMessageId, message = "\n(Tool Response)\nisError:$isError\nresponse:$resultMessage", appending = true)
+                        updateMessage(id = toolMessageId, message = "\n\n(Tool Response)\nisError:$isError\nresponse:$resultMessage", appending = true)
                         result
                     } else {
                         addMessage(ChatUiState.Message.Type.Tool, "(Cannot find Tool)")

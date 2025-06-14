@@ -6,6 +6,7 @@ import dev.shreyaspatil.ai.client.generativeai.type.Content
 import dev.shreyaspatil.ai.client.generativeai.type.FunctionCallPart
 import dev.shreyaspatil.ai.client.generativeai.type.FunctionDeclaration
 import dev.shreyaspatil.ai.client.generativeai.type.FunctionResponsePart
+import dev.shreyaspatil.ai.client.generativeai.type.RequestOptions
 import dev.shreyaspatil.ai.client.generativeai.type.Schema
 import dev.shreyaspatil.ai.client.generativeai.type.TextPart
 import dev.shreyaspatil.ai.client.generativeai.type.Tool as GeminiTool
@@ -24,6 +25,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlin.time.Duration.Companion.seconds
 
 class GeminiLLM: LLM {
     companion object {
@@ -80,6 +82,7 @@ class GeminiLLM: LLM {
                 temperature = 0.7f
             },
             tools = tools,
+            requestOptions = RequestOptions(timeout = 20.seconds),
             systemInstruction = Content(
                 parts = listOf(TextPart(text = systemPrompt))
             )

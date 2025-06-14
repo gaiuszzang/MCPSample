@@ -56,6 +56,7 @@ import io.groovin.mcpsample.ui.theme.MCPSampleTheme
 import io.groovin.mcpsample.ui.theme.darkChatBackgroundColor
 import io.groovin.mcpsample.ui.theme.lightChatBackgroundColor
 import io.groovin.mcpsample.util.TTS
+import io.groovin.mcpsample.util.logd
 import io.groovin.mcpsample.util.showToast
 import io.groovin.permx.permX
 import kotlinx.collections.immutable.ImmutableList
@@ -69,6 +70,9 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.java.KoinJavaComponent.inject
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        private const val TAG = "MainActivity"
+    }
     private val permX by permX()
     private val permHandler: LocalToolPermissionHandler by inject()
     private val showPermRationalPopupStateFlow = MutableStateFlow<ImmutableList<String>>(persistentListOf())
@@ -92,6 +96,7 @@ class MainActivity : ComponentActivity() {
             }
             MCPSampleTheme {
                 OnResumeEffect {
+                    logd(TAG, "onResume")
                     viewModel.checkConnection()
                 }
                 MCPHome(

@@ -29,6 +29,7 @@ class ClaudeLLM: LLM {
     override fun setApiKey(apiKey: String) {
         anthropic?.close()
         anthropic = AnthropicOkHttpClient.builder()
+            .timeout(java.time.Duration.ofSeconds(20))
             .apiKey(apiKey)
             .build()
     }
