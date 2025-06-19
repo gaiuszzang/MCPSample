@@ -33,6 +33,7 @@ class OpenAiLLM: LLM {
     override fun setApiKey(apiKey: String) {
         openAi?.close()
         openAi = OpenAIOkHttpClient.builder()
+            .timeout(java.time.Duration.ofSeconds(20))
             .apiKey(apiKey)
             .build()
     }
@@ -100,6 +101,7 @@ class OpenAiLLM: LLM {
         val openAIClient = openAi ?: throw Throwable("OpenAI client is not initialized")
 
         yield()
+
         openAIClient.chat().completions().create(chatParamBuilder.build()).choices().stream().consumeAsFlow()
             .map { it.message() }
             .collect { message ->

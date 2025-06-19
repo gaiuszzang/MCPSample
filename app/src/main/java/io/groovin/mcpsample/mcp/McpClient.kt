@@ -9,6 +9,8 @@ import io.modelcontextprotocol.kotlin.sdk.Tool
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import io.modelcontextprotocol.kotlin.sdk.shared.RequestOptions
 import io.modelcontextprotocol.kotlin.sdk.shared.Transport
+import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration.Companion.seconds
 
 class McpClient(
     val name: String,
@@ -62,7 +64,9 @@ class McpClient(
 
     suspend fun ping(): Boolean {
         return try {
-            mcp.ping()
+            withTimeout(2.seconds) {
+                mcp.ping()
+            }
             true
         } catch (e: Throwable) {
             e.printStackTrace()
