@@ -13,11 +13,6 @@ import io.groovin.mcpsample.mcp.localserver.McpLocalServer
 import io.groovin.mcpsample.mcp.localserver.notification.NotificationReadTool
 import io.groovin.mcpsample.mcp.localserver.phonecall.PhoneCallTool
 import io.groovin.mcpsample.mcp.localserver.contact.RemoveContactTool
-import io.groovin.mcpsample.mcp.localserver.memory.DeleteMemoryTool
-import io.groovin.mcpsample.mcp.localserver.memory.GetAllMemoryTool
-import io.groovin.mcpsample.mcp.localserver.memory.SearchMemoryTool
-import io.groovin.mcpsample.mcp.localserver.memory.AddMemoryTool
-import io.groovin.mcpsample.mcp.localserver.memory.UpdateMemoryTool
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -42,11 +37,6 @@ val appModule = module {
                 RemoveContactTool(get(), get()),
                 PhoneCallTool(get(), get()),
                 NotificationReadTool(get(), get()),
-                GetAllMemoryTool(get(), get()),
-                AddMemoryTool(get(), get()),
-                SearchMemoryTool(get(), get()),
-                DeleteMemoryTool(get(), get()),
-                UpdateMemoryTool(get(), get()),
             )
         )
     }

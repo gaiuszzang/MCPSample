@@ -55,6 +55,7 @@ class MainRepository(
         private const val AUTO_ENABLE_MCP_CONNECTION = "AUTO_ENABLE_MCP_CONNECTION"
         private const val MCP_REMOTE_SERVER_LIST = "MCP_REMOTE_SERVER_LIST"
         private const val USER_MEMORY_PREF_KEY = "USER_MEMORY"
+        private const val USER_MEMORY_ENABLED_PREF_KEY = "USER_MEMORY_ENABLED"
     }
     private val coroutineScope = CoroutineScope(SupervisorJob())
     private val encryptHelper = EncryptHelper(
@@ -127,6 +128,17 @@ class MainRepository(
     fun setUserMemory(memory: String) {
         sharedPreferences.edit {
             putString(USER_MEMORY_PREF_KEY, memory)
+            commit()
+        }
+    }
+
+    fun getUserMemoryEnabled(): Boolean {
+        return sharedPreferences.getBoolean(USER_MEMORY_ENABLED_PREF_KEY, false)
+    }
+
+    fun setUserMemoryEnabled(enabled: Boolean) {
+        sharedPreferences.edit {
+            putBoolean(USER_MEMORY_ENABLED_PREF_KEY, enabled)
             commit()
         }
     }

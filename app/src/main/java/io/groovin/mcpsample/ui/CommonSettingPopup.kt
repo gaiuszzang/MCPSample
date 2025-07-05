@@ -52,7 +52,7 @@ fun CommonSettingPopup(
                     value = uiState.claudeApiKey,
                     onValueChange = uiState.onClaudeApiKeyUpdate
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item(key = "gemini_api_key") {
                 SettingTitle(text = "Gemini API-KEY")
@@ -61,7 +61,7 @@ fun CommonSettingPopup(
                     value = uiState.geminiApiKey,
                     onValueChange = uiState.onGeminiApiKeyUpdate
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item(key = "openai_api_key") {
                 SettingTitle(text = "OpenAI API-KEY")
@@ -70,7 +70,7 @@ fun CommonSettingPopup(
                     value = uiState.openAiApiKey,
                     onValueChange = uiState.onOpenAiApiKeyUpdate
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item(key = "system_prompt") {
                 SettingTitle(text = "System Prompt")
@@ -85,7 +85,43 @@ fun CommonSettingPopup(
                     textStyle = McpTheme.textStyle.copy(fontSize = 14.sp),
                     onValueChange = uiState.onSystemPromptUpdate
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            item(key = "memory") {
+                SettingTitle(text = "Memory")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = "Use Memory",
+                        style = McpTheme.textStyle.copy(
+                            fontSize = 16.sp
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    ToggleSwitch(
+                        isOn = uiState.memoryEnabled,
+                        onChanged = {
+                            uiState.onMemoryEnabled(!uiState.memoryEnabled)
+                        }
+                    )
+                }
+                InputTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = McpTheme.inputTextFieldBackgroundColor, shape = RoundedCornerShape(8.dp))
+                        .padding(8.dp),
+                    value = uiState.memoryContext,
+                    minLines = 5,
+                    maxLines = 5,
+                    textStyle = McpTheme.textStyle.copy(fontSize = 14.sp),
+                    onValueChange = uiState.onMemoryContextUpdate
+                )
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item(key = "hotword") {
                 SettingTitle(text = "Hotword")
@@ -112,6 +148,7 @@ fun CommonSettingPopup(
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item(key = "textToSpeech") {
                 Row(
@@ -135,6 +172,7 @@ fun CommonSettingPopup(
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item(key = "asrAutoResultMode") {
                 Row(
@@ -158,6 +196,7 @@ fun CommonSettingPopup(
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item(key = "autoEnableMcpConnection") {
                 Row(
@@ -181,6 +220,7 @@ fun CommonSettingPopup(
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

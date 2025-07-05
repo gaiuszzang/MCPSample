@@ -2,6 +2,22 @@
 <resources>
     <style name="Theme.MCPSample" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <!-- parent : androidx.compose.material3.R.style.EdgeToEdgeFloatingDialogWindowTheme -->
-    <style name="BottomSheetContainerDialogTheme" parent="EdgeToEdgeFloatingDialogWindowTheme" />
+    <style name="BottomSheetContainerDialogStyle">
+        <item name="android:dialogTheme">@style/BottomSheetContainerDialogTheme</item>
+    </style>
+    <style name="BottomSheetContainerDialogTheme" parent="Base.Theme.AppCompat.Dialog" >
+        <item name="android:windowLayoutInDisplayCutoutMode">@integer/bottom_sheet_layout_display_cutout_mode</item>
+        <item name="android:windowClipToOutline">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0</item>
+        <item name="android:windowElevation">0dp</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+    </style>
+    <integer name="bottom_sheet_layout_display_cutout_mode">3</integer>
 </resources>

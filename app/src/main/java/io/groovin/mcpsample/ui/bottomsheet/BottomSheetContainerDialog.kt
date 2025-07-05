@@ -280,7 +280,7 @@ private class BottomSheetDialogWrapper(
 ) : ComponentDialog(
     ContextThemeWrapper(
         composeView.context,
-        io.groovin.mcpsample.R.style.BottomSheetContainerDialogTheme
+        io.groovin.mcpsample.R.style.BottomSheetContainerDialogStyle
     )
 ), ViewRootForInspector {
 

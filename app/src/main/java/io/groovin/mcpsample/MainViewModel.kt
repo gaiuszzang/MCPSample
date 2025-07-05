@@ -105,6 +105,8 @@ class MainViewModel(
                 geminiApiKey = mainRepository.getGeminiApiKey(),
                 openAiApiKey = mainRepository.getOpenAiApiKey(),
                 systemPrompt = mainRepository.getSystemPrompt(),
+                memoryContext = mainRepository.getUserMemory(),
+                memoryEnabled = mainRepository.getUserMemoryEnabled(),
                 hotWordEnabled = mainRepository.getHotWordEnabled(),
                 hotWordText = mainRepository.getHotWordText(),
                 textToSpeechEnabled = mainRepository.getTextToSpeechEnabled(),
@@ -114,6 +116,8 @@ class MainViewModel(
                 onGeminiApiKeyUpdate = ::updateGeminiApiKey,
                 onOpenAiApiKeyUpdate = ::updateOpenAiApiKey,
                 onSystemPromptUpdate = ::updateSystemPrompt,
+                onMemoryContextUpdate = ::updateMemoryContext,
+                onMemoryEnabled = ::updateMemoryEnabled,
                 onHotWordEnabled = ::updateHotWordEnabled,
                 onHotWordUpdate = ::updateHotWordText,
                 onTextToSpeechEnabled = ::updateTextToSpeechEnabled,
@@ -178,34 +182,12 @@ class MainViewModel(
 
     private suspend fun handleMessage(messages: List<LLMManager.MessageItem>) {
         val userPrompt = messages.lastOrNull { it.type == LLMManager.MessageItem.Type.User }?.message ?: ""
-        var userMemory = mainRepository.getUserMemory()
-
-        if (userPrompt.isNotBlank()) {
-            val updatedMemory = runMemoryTask(
-                systemPrompt = "You update long term memory. Respond only with the updated memory.",
-                userPrompt = userPrompt,
-                memory = userMemory
-            ).trim()
-            if (updatedMemory.isNotEmpty()) {
-                userMemory = updatedMemory
-                mainRepository.setUserMemory(userMemory)
-            }
-        }
-
-        val relatedMemory = if (userPrompt.isNotBlank()) {
-            runMemoryTask(
-                systemPrompt = "Extract relevant part from memory for given prompt. Return empty string if none.",
-                userPrompt = userPrompt,
-                memory = userMemory
-            ).trim()
-        } else ""
-
+        val relatedMemory = getUserMemoryRelatedOnUserPrompt(userPrompt)
         val basePrompt = settingUiState.value.systemPrompt.trim()
         val systemPrompt = buildString {
             append(basePrompt)
             if (relatedMemory.isNotBlank()) {
-                append("\n")
-                append(relatedMemory)
+                append("\nrelatedMemory:$relatedMemory\n")
             }
         }
         try {
@@ -248,6 +230,51 @@ class MainViewModel(
             e.printStackTrace()
             addMessage(ChatUiState.Message.Type.System, "Error: ${e.message}")
         }
+    }
+
+    private suspend fun getUserMemoryRelatedOnUserPrompt(userPrompt: String): String {
+        if (!mainRepository.getUserMemoryEnabled()) return ""
+
+        var userMemory = mainRepository.getUserMemory()
+        val memoryMessageId = createMessageId()
+        if (userPrompt.isNotBlank()) {
+            addMessage(ChatUiState.Message.Type.Tool, "(Memory)\nrequest to update long term memory\ncurrent memory:$userMemory", id = memoryMessageId)
+            val updatedMemory = runMemoryTask(
+                systemPrompt = "Following is my prompt and current memory contents.\n" +
+                        "For the given prompt, if there is a person's name, personal information, " +
+                        "contact information, calendar, specific event, or something explicitly requested to be remembered, " +
+                        "extract only that part and return it with the existing memory contents added or updated.\n" +
+                        "In other words, the existing memory contents should be included along with the new contents.\n" +
+                        "If possible, unnecessary contents do not need to be remembered additionally. " +
+                        "If there is nothing to update, return an empty string. " +
+                        "This is a system request, so answer as requested and do not ask again.",
+                        //TODO : 다른 tool call에서 처리할 수 있는 것은 기억하지 말자. 최대한 중요한 사항만, 장기적으로 꼭 기억해야 할 사항만 판단해서 기억하자.
+                userPrompt = userPrompt,
+                memory = userMemory
+            ).trim()
+            if (updatedMemory.isNotEmpty()) {
+                userMemory = updatedMemory
+                mainRepository.setUserMemory(userMemory)
+                updateMessage(memoryMessageId, "(Memory)\nlong term memory updated\nupdated memory:$userMemory", appending = true)
+            } else {
+                updateMessage(memoryMessageId, "(Memory)\nlong term memory not updated", appending = true)
+            }
+        }
+
+        val relatedMemory = if (userPrompt.isNotBlank()) {
+            updateMessage(memoryMessageId, "(Memory)\nget the relevant part from memory for given prompt", appending = true)
+            val relatedMemory = runMemoryTask(
+                systemPrompt = "Following is my prompt and current memory contents. " +
+                        "If there is anything worth referencing in the prompt passed from memory, extract only that part separately. " +
+                        "If there is no anything worth referencing, return an empty string. " +
+                        "This request is a system request, so just answer as requested and do not ask me again.",
+                userPrompt = userPrompt,
+                memory = userMemory
+            ).trim()
+            updateMessage(memoryMessageId, "(Memory)\nget relevant part of memory:\n$relatedMemory", appending = true)
+            relatedMemory
+        } else ""
+        return relatedMemory
     }
 
     private fun addMessage(messageType: ChatUiState.Message.Type, message: String, id: String = createMessageId()) {
@@ -353,6 +380,20 @@ class MainViewModel(
             it.copy(systemPrompt = systemPrompt)
         }
         mainRepository.setSystemPrompt(systemPrompt)
+    }
+
+    fun updateMemoryContext(memoryContext: String) {
+        _settingUiState.update {
+            it.copy(memoryContext = memoryContext)
+        }
+        mainRepository.setUserMemory(memoryContext)
+    }
+
+    fun updateMemoryEnabled(isEnabled: Boolean) {
+        _settingUiState.update {
+            it.copy(memoryEnabled = isEnabled)
+        }
+        mainRepository.setUserMemoryEnabled(isEnabled)
     }
 
     fun updateHotWordEnabled(isEnabled: Boolean) {
@@ -469,10 +510,14 @@ data class SettingUiState(
     val geminiApiKey: String = "",
     val openAiApiKey: String = "",
     val systemPrompt: String = "",
+    val memoryContext: String = "",
     val onClaudeApiKeyUpdate: (String) -> Unit = {},
     val onGeminiApiKeyUpdate: (String) -> Unit = {},
     val onOpenAiApiKeyUpdate: (String) -> Unit = {},
     val onSystemPromptUpdate: (String) -> Unit = {},
+    val onMemoryContextUpdate: (String) -> Unit = {},
+    val memoryEnabled: Boolean = false,
+    val onMemoryEnabled: (Boolean) -> Unit = {},
     val hotWordEnabled: Boolean = false,
     val hotWordText: String = "",
     val onHotWordEnabled: (Boolean) -> Unit = {},
